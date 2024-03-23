@@ -1,5 +1,6 @@
 import {Controller, Get} from "@nestjs/common";
-import {TagService} from "./tag.service";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {TagService} from "@app/tag/tag.service";
 
 @Controller('tags')    //Теперь такой префикс будет у всех энпоинтов этого контроллера
 export class TagController {

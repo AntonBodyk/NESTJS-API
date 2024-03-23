@@ -8,7 +8,8 @@ const config: PostgresConnectionOptions = {
     password: '12345',
     database: 'mediumclone',
     entities: [__dirname + '/**/*.entity{.ts, .js}'],            //нужно указывать шоб читались все сущности + поддерживает файлы с расширениями тс и джс
-    synchronize: true
+    synchronize: false,                   //если в true то при старте приложения генерится БД
+    migrations: [__dirname + '/migrations/**/*{.ts, .js}']
 }
 
 export default config;
