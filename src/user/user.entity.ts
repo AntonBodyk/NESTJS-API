@@ -7,6 +7,9 @@ export class UserEntity {
   id: number
 
   @Column()
+  username: string;
+
+  @Column()
   email: string;
 
   @Column({default: ''})       //Внутри колонок можем указывать дефолт значения данных
@@ -21,6 +24,11 @@ export class UserEntity {
 
   @BeforeInsert()
   async hashPassword() {        //используем для хэширования пароля
-    this.password = await hash(this.password, 10);
+    if (this.password) {
+      console.log('Received password:', this.password);
+      this.password = await hash(this.password, 10);
+    } else {
+      console.log('No password received');
+    }
   }
 }
