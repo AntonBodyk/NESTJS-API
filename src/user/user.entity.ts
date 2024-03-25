@@ -18,7 +18,7 @@ export class UserEntity {
   @Column({default: ''})
   img: string;
 
-  @Column()
+  @Column({select: false})    //Важная сущность которая исключает из всех запросов пароль, так как не нужно его возвращать на клиент !!!
   password: string;
 
 

@@ -6,6 +6,8 @@ import { Repository } from "typeorm";
 import {sign} from 'jsonwebtoken';
 import { JWT_SECRET } from "@app/config";
 import { UserResponseInterface } from "@app/types/userResponse.interface";
+import { LoginUserDto } from "@app/user/dto/loginUser.dto";
+import {compare} from "bcrypt";
 
 @Injectable()
 export class UserService {
@@ -35,6 +37,28 @@ export class UserService {
     this.logger.debug('newUser:', newUser);
 
     return await this.userRepository.save(newUser);
+  }
+
+  async loginUser(loginUserDto: LoginUserDto): Promise<UserEntity>{       //Используется для входа!!! Выше для регистрации !
+    const user =  await this.userRepository.findOne({
+      where: {
+        email: loginUserDto.email
+      },
+      select: ['id', 'username', 'bio', 'img', 'email', 'password']     //нужен пароль для сравнения! поэтому описываем все сущности
+    });
+
+    if(!user){
+      throw new HttpException('Нет email', HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    const isUserPassword = await compare(loginUserDto.password, user.password);
+
+    if(!isUserPassword){
+      throw new HttpException('Пароль неправильный', HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    delete user.password; //удаляем пароль, что бы не отправлять его на клиент
+    return user;
   }
 
   generateJwt(user: UserEntity): string {
