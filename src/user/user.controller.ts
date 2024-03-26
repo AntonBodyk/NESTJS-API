@@ -1,10 +1,12 @@
-import { Body, Controller, Post, ValidationPipe, UsePipes, Get, Req } from "@nestjs/common";
+import { Body, Controller, Post, ValidationPipe, UsePipes, Get, UseGuards, Put } from "@nestjs/common";
 import { UserService } from "@app/user/user.service";
 import { CreateUserDto } from "@app/user/dto/createUser.dto";
-import { UserResponseInterface } from "@app/types/userResponse.interface";
+import { UserResponseInterface } from "@app/user/types/userResponse.interface";
 import { LoginUserDto } from "@app/user/dto/loginUser.dto";
-import {Request} from "express";
-import { ExpressRequest } from "@app/types/expressRequest.interface";
+import { UserDecorator } from "@app/user/decorators/user.decorator";
+import { UserEntity } from "@app/user/user.entity";
+import { AuthGuard } from "@app/user/guards/auth.guard";
+import { UpdateUserDto } from "@app/user/dto/updateUser.dto";
 
 @Controller()
 export class UserController {
@@ -26,8 +28,15 @@ export class UserController {
   }
 
   @Get('user')
-  async getCurrentUser(@Req() request: ExpressRequest): Promise<UserResponseInterface> {
-      console.log(request.user);
-      return 'current user' as any;
+  @UseGuards(AuthGuard)       //проверяет зареган ли пользователь ! теперь все чотко и тут всегда будет зарегистрированній пользователь
+  async getCurrentUser(@UserDecorator() user: UserEntity ): Promise<UserResponseInterface> {
+      return this.userService.buildUserResponse(user);
+  }
+
+  @Put('user')
+  @UseGuards(AuthGuard)
+  async updateCurrentUser(@UserDecorator('id') currentUserId: number, @Body('user') updateUserDto: UpdateUserDto ): Promise<UserResponseInterface> {
+      const user = await this.userService.updateUser(currentUserId, updateUserDto);   //обновляет пользователя по id
+      return this.userService.buildUserResponse(user);
   }
 }
