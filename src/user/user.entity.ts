@@ -1,5 +1,6 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import {hash} from 'bcrypt';
+import { ArticleEntity } from "@app/article/article.entity";
 
 @Entity('users')
 export class UserEntity {
@@ -31,4 +32,7 @@ export class UserEntity {
       console.log('No password received');
     }
   }
+
+  @OneToMany(() => ArticleEntity, (article) => article.author)    //Пример взаимосвязи один ко многим между юзером и статьями !!!
+  articles: ArticleEntity[];
 }
