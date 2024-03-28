@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn, JoinTable } from "typeorm";
 import {hash} from 'bcrypt';
 import { ArticleEntity } from "@app/article/article.entity";
 
@@ -35,4 +35,8 @@ export class UserEntity {
 
   @OneToMany(() => ArticleEntity, (article) => article.author)    //Пример взаимосвязи один ко многим между юзером и статьями !!!
   articles: ArticleEntity[];
+
+  @ManyToMany(() => ArticleEntity)
+  @JoinTable()
+  favorites: ArticleEntity[];
 }

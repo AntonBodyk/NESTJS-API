@@ -82,6 +82,8 @@ export class ArticleService {
     const articlesCount = await queryBuilder.getCount(); //возращаем общее кол-во записей в запросе
     //ВАЖНО ДЕЛАТЬ ПОСЛЕ ПОДСЧЕТА ЗАПИСЕЙ!!!
 
+
+
     if(query.tag){
       queryBuilder.andWhere('articles.tagList LIKE :tag', {
         tag: `%${query.tag}%`
@@ -100,6 +102,25 @@ export class ArticleService {
       });
     }
 
+    if(query.favorited){
+      const author = await this.userRepository.findOne({
+        where: {
+          username: query.favorited
+        },
+        relations: ['favorites']
+      })
+
+      const ids = author.favorites.map((el) => el.id);
+      if(ids.length > 0){
+        queryBuilder.andWhere('articles.id IN (:...ids)', {ids});
+      }else{
+        queryBuilder.andWhere('1=0'); //нужно что бы обрвать builder, это условие никогда не выполнится !
+      }
+
+      console.log('author', author);
+    }
+
+
     if(query.limit){
       queryBuilder.limit(query.limit);
     }
@@ -108,9 +129,67 @@ export class ArticleService {
       queryBuilder.offset(query.offset);
     }
 
+    let favoritesIds: number[] = [];
+    if(userId){
+      const currentUser = await this.userRepository.findOne({
+        where: {
+          id: userId
+        },
+        relations: ['favorites']
+      });
+      favoritesIds = currentUser.favorites.map((favorite) => favorite.id);
+    }
+
     const articles = await queryBuilder.getMany();    //таким способом возращаем все статьи
+    const articlesWithFavorites = articles.map(article => {
+      const favorited = favoritesIds.includes(article.id);
+      return {...article, favorited};
+    });
 
+    return  {articles: articlesWithFavorites, articlesCount};
+  }
 
-    return  {articles, articlesCount};
+  async addArticleToFavorites(currentUserId: number, slug: string): Promise<ArticleEntity> {
+    const article = await this.findBySlug(slug);
+    const user = await this.userRepository.findOne({
+      where: {
+        id: currentUserId
+      },
+      relations: ['favorites']
+    })
+
+    const isNotFavorited = user.favorites.findIndex(
+      (articleInFavorites) => articleInFavorites.id === article.id) === -1;
+
+    if(isNotFavorited){
+      user.favorites.push(article);
+      article.favoritesCount++;
+      await this.userRepository.save(user);
+      await this.articleRepository.save(article);
+    }
+
+    return article;
+  }
+
+  async deleteArticleToFavorites(currentUserId: number, slug: string): Promise<ArticleEntity> {
+    const article = await this.findBySlug(slug);
+    const user = await this.userRepository.findOne({
+      where: {
+        id: currentUserId
+      },
+      relations: ['favorites']
+    });
+
+    const articleIndex = user.favorites.findIndex(
+      (articleInFavorites) => articleInFavorites.id === article.id);
+
+    if(articleIndex >= 0){
+      user.favorites.splice(articleIndex, 1);
+      article.favoritesCount--;
+      await this.userRepository.save(user);
+      await this.articleRepository.save(article);
+    }
+
+    return article;
   }
 }
