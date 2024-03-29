@@ -30,6 +30,13 @@ export class ArticleController {
   async findAll(@UserDecorator('id') userId: number, @Query() query: any ): Promise<ArticlesResponseInterface> {
     return await this.articleService.findAll(userId, query);
   }
+
+  @Get('feed')
+  @UseGuards(AuthGuard)
+  async getFeed(@UserDecorator('id') currentUserId: number, @Query() query: any ):
+    Promise<ArticlesResponseInterface>{
+    return await this.articleService.getFeed(currentUserId, query);
+  }
   @Post()
   @UseGuards(AuthGuard)
   async create(@UserDecorator() currentUser: UserEntity, @Body('article') createArticalDto: CreateArticalDto ): Promise<ArticleResponseInterface> {

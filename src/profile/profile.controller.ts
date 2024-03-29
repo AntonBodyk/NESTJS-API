@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Controller, Delete, Get, Param, Post, UseGuards} from "@nestjs/common";
 import { UserDecorator } from "@app/user/decorators/user.decorator";
 import { ProfileResponseInterface } from "@app/profile/types/profileResponse.interface";
 import { ProfileService } from "@app/profile/profile.service";
