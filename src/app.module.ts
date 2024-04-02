@@ -8,9 +8,10 @@ import { UserModule } from "@app/user/user.module";
 import { AuthMiddleware } from "@app/user/middlewares/auth.middleware";
 import { ArticleModule } from "@app/article/article.module";
 import { ProfileModule } from "@app/profile/profile.module";
+import { CommentModule } from './comment/comment.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(config), TagModule, UserModule, ArticleModule, ProfileModule],            //ВСЕ МОДУЛИ КОТОРЫЕ БУДУТ СОЗДАНЫ, ДОЛЖНЫ РЕГИСТРИРОВАТЬСЯ ТУТ
+  imports: [TypeOrmModule.forRoot(config), TagModule, UserModule, ArticleModule, ProfileModule, CommentModule],            //ВСЕ МОДУЛИ КОТОРЫЕ БУДУТ СОЗДАНЫ, ДОЛЖНЫ РЕГИСТРИРОВАТЬСЯ ТУТ
   controllers: [AppController],
   providers: [AppService],
 })
